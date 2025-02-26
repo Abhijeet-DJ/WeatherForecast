@@ -2505,44 +2505,59 @@
 <script>
   // for pressure
   document.addEventListener("DOMContentLoaded", function () {
-    const pressureNumberEl = document.getElementById("pressure-number");
-    const gaugeArc = document.getElementById("gaugeArc");
-    const needle = document.getElementById("needle");
+  const pressureNumberEl = document.getElementById("pressure-number");
+  const gaugeArc = document.getElementById("gaugeArc");
+  const needle = document.getElementById("needle");
 
-    // Define pressure range (Modify based on real-world values)
-    const minPressure = 960; // Minimum pressure in hPa
-    const maxPressure = 1060; // Maximum pressure in hPa
+  // Define pressure range (Modify based on real-world values)
+  const minPressure = 960; // Minimum pressure in hPa
+  const maxPressure = 1060; // Maximum pressure in hPa
 
-    function updatePressure(pressure) {
-        // Update the displayed pressure number
-        pressureNumberEl.textContent = `${pressure} hPa`;
+  function updatePressure(pressure) {
+      // Update the displayed pressure number
+      pressureNumberEl.textContent = `${pressure} hPa`;
 
-        // Convert pressure to gauge position (0° to 180°)
-        let pressurePercentage = (pressure - minPressure) / (maxPressure - minPressure);
-        let dashOffset = 180 - (pressurePercentage * 180); // Reverse gauge arc animation
+      // Convert pressure to gauge position (0° to 180°)
+      let pressurePercentage = (pressure - minPressure) / (maxPressure - minPressure);
+      let dashOffset = 180 - (pressurePercentage * 180); // Reverse gauge arc animation
 
-        // Update gauge arc fill
-        gaugeArc.style.transition = "stroke-dashoffset 0.5s ease-in-out";
-        gaugeArc.setAttribute("stroke-dashoffset", dashOffset);
+      // Update gauge arc fill
+      gaugeArc.style.transition = "stroke-dashoffset 0.5s ease-in-out";
+      gaugeArc.setAttribute("stroke-dashoffset", dashOffset);
 
-        // Calculate the needle angle (-90° to 90° for half-circle gauge)
-        let needleAngle = -90 + (pressurePercentage * 180);
+      // Calculate the needle angle (-90° to 90° for half-circle gauge)
+      let needleAngle = -90 + (pressurePercentage * 180);
 
-        // Ensure smooth needle animation
-        needle.style.transformOrigin = "90px 90px"; // Set correct pivot point
-        needle.style.transition = "transform 0.5s ease-in-out";
-        needle.style.transform = `rotate(${needleAngle}deg)`;
+      // Ensure smooth needle animation
+      needle.style.transformOrigin = "90px 90px"; // Set correct pivot point
+      needle.style.transition = "transform 0.5s ease-in-out";
+      needle.style.transform = `rotate(${needleAngle}deg)`;
+  }
+
+  // Simulate live pressure updates every 3 seconds (Replace with actual API data)
+  setInterval(() => {
+      let simulatedPressure = Math.floor(minPressure + Math.random() * (maxPressure - minPressure));
+      updatePressure(simulatedPressure);
+  }, 3000);
+
+  // Initial update
+  updatePressure(1011); // Default starting pressure
+});
+
+</script>
+<script>
+  // For pressure needle
+  function rotateNeedle(angle) {
+    const needleGroup = document.getElementById("needle-group"); // The group wrapping your paths
+    if (!needleGroup) {
+        console.error("Needle group not found!");
+        return;
     }
 
-    // Simulate live pressure updates every 5 seconds (Replace with actual API data)
-    setInterval(() => {
-        let simulatedPressure = Math.floor(minPressure + Math.random() * (maxPressure - minPressure));
-        updatePressure(simulatedPressure);
-    }, 5000);
-
-    // Initial update
-    updatePressure(1011); // Default starting pressure
-});
+    // Apply rotation transformation around the center of the SVG (adjust cx, cy if needed)
+    needleGroup.setAttribute("transform", `rotate(${angle}, 12, 12)`);
+}
+rotateNeedle(190);
 </script>
 
 <script>
@@ -2561,65 +2576,56 @@ rotateNeedle(100);
 </script>
 
 <script>
-  // for AQI
-  document.addEventListener("DOMContentLoaded", function () {
-    const aqiValueEl = document.querySelector(".aqi-value");
-    const gaugeFill = document.querySelector(".gauge-fill");
-    const gaugePointer = document.querySelector(".gauge-pointer");
-    const aqiStatusEl = document.querySelector(".aqi-status");
-    const statusIconEl = document.querySelector(".status-icon");
-
-    // AQI Categories and Colors
-    const aqiLevels = [
-        { limit: 50, label: "Good", color: "🟢" },
-        { limit: 100, label: "Moderate", color: "🟡" },
-        { limit: 150, label: "Unhealthy for Sensitive Groups", color: "🟠" },
-        { limit: 200, label: "Unhealthy", color: "🔴" },
-        { limit: 300, label: "Very Unhealthy", color: "🟣" },
-        { limit: 500, label: "Hazardous", color: "⚫" }
-    ];
-
-    function getAQIStatus(aqi) {
-        for (let level of aqiLevels) {
-            if (aqi <= level.limit) {
-                return level;
-            }
-        }
-        return aqiLevels[aqiLevels.length - 1]; // Default to Hazardous if above 500
-    }
-
-    function updateAQI(aqi) {
-        // Update AQI value
-        aqiValueEl.textContent = aqi;
-
-        // Get AQI category and update status
-        const { label, color } = getAQIStatus(aqi);
-        statusIconEl.textContent = color;
-        aqiStatusEl.innerHTML = `<span class="status-icon">${color}</span>${label}`;
-
-        // Convert AQI to gauge percentage (0 to 100 scale)
-        let percentage = Math.min((aqi / 500) * 100, 100);
-        let dashOffset = 100 - percentage; // Reverse offset for animation
-
-        // Update gauge fill animation
-        gaugeFill.style.transition = "stroke-dashoffset 0.5s ease-in-out";
-        gaugeFill.setAttribute("stroke-dashoffset", dashOffset);
-
-        // Move the pointer based on AQI
-        let angle = -90 + (percentage * 1.8); // Convert AQI to -90° to 90° range
-        gaugePointer.style.transition = "transform 0.5s ease-in-out";
-        gaugePointer.setAttribute("transform", rotate(`${angle}`, 18, 18));
-    }
-
-    // Simulate AQI updates every 5 seconds (Replace with API data)
-    setInterval(() => {
-        let simulatedAQI = Math.floor(Math.random() * 500); // Random AQI between 0-500
-        updateAQI(simulatedAQI);
-    }, 3000);
-
-    // Initial update
-    updateAQI(252); // Default AQI value
-});
+  // For AQI
+  // Select elements
+  const aqiValueEl = document.querySelector(".aqi-value");
+  const gaugeFill = document.querySelector(".gauge-fill");
+  const gaugePointer = document.querySelector(".gauge-pointer");
+  const aqiStatusEl = document.querySelector(".aqi-status");
+  const statusIconEl = document.querySelector(".status-icon");
+  
+  // Function to get AQI label and color
+  function getAQIStatus(aqi) {
+      if (aqi <= 50) return { label: "Good", color: "🟢" };
+      if (aqi <= 100) return { label: "Moderate", color: "🟡" };
+      if (aqi <= 150) return { label: "Unhealthy (Sensitive)", color: "🟠" };
+      if (aqi <= 200) return { label: "Unhealthy", color: "🔴" };
+      if (aqi <= 300) return { label: "Very Unhealthy", color: "🟣" };
+      return { label: "Hazardous", color: "⚠️" };
+  }
+  
+  // Function to update the AQI gauge dynamically
+  function updateAQI(aqi) {
+      // Update AQI value
+      aqiValueEl.textContent = aqi;
+  
+      // Get AQI category and update status
+      const { label, color } = getAQIStatus(aqi);
+      statusIconEl.textContent = color;
+      aqiStatusEl.innerHTML = `<span class="status-icon">${color}</span> ${label}`;
+  
+      // Convert AQI to gauge percentage (0 to 100 scale)
+      let percentage = Math.min((aqi / 500) * 100, 100);
+      let dashOffset = 100 - percentage; // Reverse offset for animation
+  
+      // Update gauge fill dynamically
+      gaugeFill.style.transition = "stroke-dashoffset 0.5s ease-in-out";
+      gaugeFill.setAttribute("stroke-dashoffset", dashOffset);
+  
+      // Move the pointer dynamically based on AQI
+      let angle = -90 + (percentage * 1.8); // Convert AQI to -90° to 90° range
+      gaugePointer.style.transition = "transform 0.5s ease-in-out";
+      gaugePointer.setAttribute("transform", `rotate(${angle}, 18, 18)`);
+  }
+  
+  // 🔄 Simulate AQI updates every 3 seconds (Replace with API data)
+  setInterval(() => {
+      let simulatedAQI = Math.floor(Math.random() * 500); // Random AQI between 0-500
+      updateAQI(simulatedAQI);
+  }, 3000);
+  
+  // 🔹 Initial AQI value
+  updateAQI(252);
 
 </script>
 </html>
