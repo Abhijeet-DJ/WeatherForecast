@@ -2546,8 +2546,8 @@
 </script>
 
 <script>
-  // For compass needle
-  function rotateNeedle(angle) {
+ // For compass needle
+ function rotateNeedle(angle) {
     const needleGroup = document.getElementById("needle-group"); // The group wrapping your paths
     if (!needleGroup) {
         console.error("Needle group not found!");
@@ -2557,6 +2557,69 @@
     // Apply rotation transformation around the center of the SVG (adjust cx, cy if needed)
     needleGroup.setAttribute("transform", `rotate(${angle}, 12, 12)`);
 }
-rotateNeedle(70);
+rotateNeedle(180);
+</script>
+
+<script>
+  // for AQI
+  document.addEventListener("DOMContentLoaded", function () {
+    const aqiValueEl = document.querySelector(".aqi-value");
+    const gaugeFill = document.querySelector(".gauge-fill");
+    const gaugePointer = document.querySelector(".gauge-pointer");
+    const aqiStatusEl = document.querySelector(".aqi-status");
+    const statusIconEl = document.querySelector(".status-icon");
+
+    // AQI Categories and Colors
+    const aqiLevels = [
+        { limit: 50, label: "Good", color: "🟢" },
+        { limit: 100, label: "Moderate", color: "🟡" },
+        { limit: 150, label: "Unhealthy for Sensitive Groups", color: "🟠" },
+        { limit: 200, label: "Unhealthy", color: "🔴" },
+        { limit: 300, label: "Very Unhealthy", color: "🟣" },
+        { limit: 500, label: "Hazardous", color: "⚫" }
+    ];
+
+    function getAQIStatus(aqi) {
+        for (let level of aqiLevels) {
+            if (aqi <= level.limit) {
+                return level;
+            }
+        }
+        return aqiLevels[aqiLevels.length - 1]; // Default to Hazardous if above 500
+    }
+
+    function updateAQI(aqi) {
+        // Update AQI value
+        aqiValueEl.textContent = aqi;
+
+        // Get AQI category and update status
+        const { label, color } = getAQIStatus(aqi);
+        statusIconEl.textContent = color;
+        aqiStatusEl.innerHTML = `<span class="status-icon">${color}</span>${label}`;
+
+        // Convert AQI to gauge percentage (0 to 100 scale)
+        let percentage = Math.min((aqi / 500) * 100, 100);
+        let dashOffset = 100 - percentage; // Reverse offset for animation
+
+        // Update gauge fill animation
+        gaugeFill.style.transition = "stroke-dashoffset 0.5s ease-in-out";
+        gaugeFill.setAttribute("stroke-dashoffset", dashOffset);
+
+        // Move the pointer based on AQI
+        let angle = -90 + (percentage * 1.8); // Convert AQI to -90° to 90° range
+        gaugePointer.style.transition = "transform 0.5s ease-in-out";
+        gaugePointer.setAttribute("transform", rotate(`${angle}`, 18, 18));
+    }
+
+    // Simulate AQI updates every 5 seconds (Replace with API data)
+    setInterval(() => {
+        let simulatedAQI = Math.floor(Math.random() * 500); // Random AQI between 0-500
+        updateAQI(simulatedAQI);
+    }, 3000);
+
+    // Initial update
+    updateAQI(252); // Default AQI value
+});
+
 </script>
 </html>
