@@ -1764,7 +1764,7 @@
           <!-- Center Pressure Value -->
           <div class="pressure-value">
             <span id="pressure-number">1,011</span>
-            <span style="font-size: 0.8em;">hPa</span>
+            <!-- <span style="font-size: 0.8em;">hPa</span> -->
           </div>
 
           <!-- Low & High Labels -->
@@ -2504,18 +2504,45 @@
 
 <script>
   // for pressure
-  function rotateNeedle(angle) {
+  document.addEventListener("DOMContentLoaded", function () {
+    const pressureNumberEl = document.getElementById("pressure-number");
+    const gaugeArc = document.getElementById("gaugeArc");
     const needle = document.getElementById("needle");
-    if (!needle) {
-        console.error("Needle element not found!");
-        return;
+
+    // Define pressure range (Modify based on real-world values)
+    const minPressure = 960; // Minimum pressure in hPa
+    const maxPressure = 1060; // Maximum pressure in hPa
+
+    function updatePressure(pressure) {
+        // Update the displayed pressure number
+        pressureNumberEl.textContent = `${pressure} hPa`;
+
+        // Convert pressure to gauge position (0° to 180°)
+        let pressurePercentage = (pressure - minPressure) / (maxPressure - minPressure);
+        let dashOffset = 180 - (pressurePercentage * 180); // Reverse gauge arc animation
+
+        // Update gauge arc fill
+        gaugeArc.style.transition = "stroke-dashoffset 0.5s ease-in-out";
+        gaugeArc.setAttribute("stroke-dashoffset", dashOffset);
+
+        // Calculate the needle angle (-90° to 90° for half-circle gauge)
+        let needleAngle = -90 + (pressurePercentage * 180);
+
+        // Ensure smooth needle animation
+        needle.style.transformOrigin = "90px 90px"; // Set correct pivot point
+        needle.style.transition = "transform 0.5s ease-in-out";
+        needle.style.transform = rotateNeedle(`${needleAngle}deg`);
     }
 
-    // Apply rotation transformation
-    needle.style.transform = `rotate(${angle}deg)`;
-    needle.style.transformOrigin = "50% 50%"; // Ensures rotation happens around the center
-}
-rotateNeedle(0)
+    // Simulate live pressure updates every 5 seconds (Replace with actual API data)
+    setInterval(() => {
+        let simulatedPressure = Math.floor(minPressure + Math.random() * (maxPressure - minPressure));
+        updatePressure(simulatedPressure);
+    }, 5000);
+
+    // Initial update
+    updatePressure(1011); // Default starting pressure
+});
 </script>
 
 <script>
