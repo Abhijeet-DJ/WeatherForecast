@@ -2531,7 +2531,7 @@
         // Ensure smooth needle animation
         needle.style.transformOrigin = "90px 90px"; // Set correct pivot point
         needle.style.transition = "transform 0.5s ease-in-out";
-        needle.style.transform = rotateNeedle(`${needleAngle}deg`);
+        needle.style.transform = rotate(`${needleAngle}deg`);
     }
 
     // Simulate live pressure updates every 5 seconds (Replace with actual API data)
@@ -2555,9 +2555,9 @@
     }
 
     // Apply rotation transformation around the center of the SVG (adjust cx, cy if needed)
-    needleGroup.setAttribute("transform", `rotate(${angle}, 12, 12)`);
+    needleGroup.setAttribute("transform", `rotate(${parseInt(angle)}, 12, 12)`);
 }
-rotateNeedle(180);
+rotateNeedle(100);
 </script>
 
 <script>
